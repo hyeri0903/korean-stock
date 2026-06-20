@@ -7,7 +7,6 @@ export interface ExchangeRate {
   change: number
   changePercent: number
   previousRate: number
-  history: { date: string; close: number }[]
 }
 
 const CURRENCIES = [
@@ -26,33 +25,21 @@ const CURRENCIES = [
 ]
 
 async function fetchRate(config: typeof CURRENCIES[0]): Promise<ExchangeRate> {
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${config.ticker}?interval=1d&range=1mo`
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${config.ticker}?interval=1d&range=2d`
   const res = await fetch(url, {
     headers: { "User-Agent": "Mozilla/5.0" },
-    next: { revalidate: 3600 }, // 환율은 하루 단위
+    next: { revalidate: 3600 },
   })
   if (!res.ok) throw new Error(`${config.ticker} fetch failed`)
 
   const data = await res.json()
-  const result = data.chart.result[0]
-  const meta = result.meta
+  const meta = data.chart.result[0].meta
   const m = config.multiplier
 
-  const rawRate: number = meta.regularMarketPrice
-  const rawPrev: number = meta.chartPreviousClose ?? rawRate
-  const rate = rawRate * m
-  const previousRate = rawPrev * m
+  const rate = meta.regularMarketPrice * m
+  const previousRate = (meta.chartPreviousClose ?? meta.regularMarketPrice) * m
   const change = rate - previousRate
   const changePercent = previousRate ? (change / previousRate) * 100 : 0
-
-  const timestamps: number[] = result.timestamp ?? []
-  const closes: (number | null)[] = result.indicators.quote[0]?.close ?? []
-  const history = timestamps
-    .map((ts, i) => ({
-      date: new Date(ts * 1000).toISOString().slice(0, 10),
-      close: (closes[i] ?? 0) * m,
-    }))
-    .filter((h) => h.close > 0)
 
   return {
     ticker: config.ticker,
@@ -63,7 +50,6 @@ async function fetchRate(config: typeof CURRENCIES[0]): Promise<ExchangeRate> {
     change,
     changePercent,
     previousRate,
-    history,
   }
 }
 

@@ -3,7 +3,6 @@
 import { useQuery } from "@tanstack/react-query"
 import type { ExchangeRate } from "@/app/api/exchange/route"
 import ExchangeCard from "./ExchangeCard"
-import { RefreshCw } from "lucide-react"
 
 async function fetchExchange(): Promise<ExchangeRate[]> {
   const res = await fetch("/api/exchange")
@@ -26,7 +25,7 @@ function SkeletonCard() {
 }
 
 export default function ExchangeClient({ initial }: { initial: ExchangeRate[] }) {
-  const { data, isFetching, dataUpdatedAt } = useQuery({
+  const { data } = useQuery({
     queryKey: ["exchange"],
     queryFn: fetchExchange,
     initialData: initial,
@@ -34,25 +33,8 @@ export default function ExchangeClient({ initial }: { initial: ExchangeRate[] })
     staleTime: 60 * 60 * 1000,
   })
 
-  const updatedTime = new Date(dataUpdatedAt).toLocaleTimeString("ko-KR")
-
   return (
     <div>
-      {/* Status */}
-      <div
-        className="flex items-center justify-between mb-5 py-2.5 px-4 rounded-xl text-xs"
-        style={{ backgroundColor: "var(--surface)", border: "1px solid var(--border)" }}
-      >
-        <div className="flex items-center gap-2" style={{ color: "var(--muted)" }}>
-          <RefreshCw
-            className={`w-3.5 h-3.5 ${isFetching ? "animate-spin" : ""}`}
-            style={{ color: "var(--primary)" }}
-          />
-          <span>기준환율 (KRW) · 마지막 업데이트 {updatedTime}</span>
-        </div>
-        <span style={{ color: "var(--muted)" }}>Yahoo Finance</span>
-      </div>
-
       {/* Grid */}
       {!data?.length ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
