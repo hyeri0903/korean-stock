@@ -5,6 +5,7 @@ import Header from "@/components/layout/Header"
 import TabNav from "@/components/layout/TabNav"
 import QueryProvider from "@/providers/QueryProvider"
 import ThemeProvider from "@/providers/ThemeProvider"
+import { Analytics } from "@vercel/analytics/next"
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" })
 
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </main>
           </QueryProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   )

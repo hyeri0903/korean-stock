@@ -120,7 +120,7 @@ export default function Header() {
         <div className="flex-1 flex flex-col items-center sm:flex-none sm:absolute sm:left-1/2 sm:-translate-x-1/2">
           <div className="flex items-center gap-2">
             <TrendingUp className="w-5 h-5" style={{ color: "var(--primary)" }} />
-            <span className="text-lg font-bold tracking-tight">KOREA INVESTING</span>
+            <span className="text-lg font-bold tracking-tight">K-Stock</span>
           </div>
           <p className="hidden sm:block text-xs" style={{ color: "var(--muted)" }}>
             국내 반도체 주식 &amp; 용어 학습
