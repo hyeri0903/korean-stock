@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 const TABS = [
   { href: "/dashboard", label: "대시보드" },
   { href: "/terms", label: "주식 용어" },
+  { href: "/exchange", label: "환율" },
 ]
 
 export default function TabNav() {
