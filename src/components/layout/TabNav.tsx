@@ -8,6 +8,7 @@ const TABS = [
   { href: "/dashboard", label: "대시보드" },
   { href: "/terms", label: "주식 용어" },
   { href: "/exchange", label: "환율" },
+  { href: "/valuation", label: "예상 적정가" },
 ]
 
 export default function TabNav() {

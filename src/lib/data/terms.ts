@@ -271,6 +271,50 @@ export const TERMS: Term[] = [
       "삼성전자 연간 매출 300조원은 전 세계에서 물건을 팔아 300조 원이 들어왔다는 뜻이에요. 하지만 인건비, 연구개발비 등을 빼면 실제 이익은 훨씬 작습니다.",
     related: ["net-profit", "operating-margin", "psr"],
   },
+  {
+    slug: "fcf",
+    name: "FCF",
+    fullName: "FCF (Free Cash Flow) — 잉여현금흐름",
+    category: "재무",
+    summary: "영업으로 번 현금에서 설비 투자를 빼고 실제로 손에 남는 현금",
+    description:
+      "회사가 영업으로 벌어들인 현금에서, 공장·장비 같은 사업 유지에 꼭 필요한 투자(CapEx)를 뺀 금액입니다. 회계상 이익(순이익)과 달리 '실제로 자유롭게 쓸 수 있는 현금'을 보여줘서, 배당·자사주·빚 상환 여력을 가늠할 수 있어요.",
+    formula: "FCF = 영업활동 현금흐름 − 자본적지출(CapEx)",
+    formulaExplain: "영업현금흐름 10조원 − 설비투자 3조원 = FCF 7조원",
+    example:
+      "순이익은 흑자인데 FCF가 계속 마이너스라면, 번 돈보다 설비에 더 많이 쓰고 있다는 뜻이라 주의가 필요해요. 반대로 FCF가 꾸준히 플러스면 현금 창출력이 좋은 회사입니다.",
+    related: ["operating-margin", "net-profit", "ev-ebitda"],
+    tip: "적정주가 계산의 DCF(현금흐름할인) 방식에서 핵심 입력값으로 쓰입니다.",
+  },
+  {
+    slug: "revenue-growth",
+    name: "매출 성장률",
+    fullName: "매출 성장률 (Revenue Growth Rate)",
+    category: "재무",
+    summary: "지난 기간 대비 매출이 얼마나 늘었는지를 나타내는 비율",
+    description:
+      "전년(또는 전분기) 대비 매출이 몇 % 증가했는지 보여줍니다. 회사가 성장하고 있는지 가장 직관적으로 알 수 있는 지표예요. 성장률이 높을수록 시장은 보통 더 높은 PER을 인정해 줍니다.",
+    formula: "매출 성장률 = (당기 매출 − 전기 매출) ÷ 전기 매출 × 100(%)",
+    formulaExplain: "올해 매출 120조 − 작년 100조 = 20조 → 성장률 20%",
+    example:
+      "매출 성장률이 30%인 회사는 빠르게 크는 중이에요. 다만 성장률이 둔화되기 시작하면 주가가 먼저 반응해 떨어지는 경우가 많습니다.",
+    related: ["revenue", "peg", "psr"],
+    tip: "PEG는 PER을 이 성장률로 나눠 '성장 대비 비싼지'를 보는 지표예요.",
+  },
+  {
+    slug: "shares-outstanding",
+    name: "발행주식수",
+    fullName: "발행주식수 (Shares Outstanding)",
+    category: "재무",
+    summary: "회사가 발행해 시장에 존재하는 주식의 총 개수",
+    description:
+      "시가총액(주가 × 발행주식수)과 EPS(순이익 ÷ 발행주식수)를 계산하는 기준이 되는 숫자입니다. 회사가 유상증자를 하면 주식 수가 늘어 기존 주주의 몫이 줄고(희석), 자사주 소각을 하면 주식 수가 줄어 주당 가치가 올라갑니다.",
+    formula: "EPS = 순이익 ÷ 발행주식수",
+    formulaExplain: "순이익 60조원 ÷ 60억 주 = EPS 10,000원",
+    example:
+      "순이익이 똑같아도 발행주식수가 늘면 EPS가 줄어 주가에 불리해요. 그래서 자사주 소각은 보통 주주 친화적 정책으로 봅니다.",
+    related: ["market-cap", "eps"],
+  },
 
   // 배당
   {
