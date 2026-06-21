@@ -1,6 +1,6 @@
 "use client"
 
-import type { ExchangeRate } from "@/app/api/exchange/route"
+import type { ExchangeRate } from "@/lib/api/exchange"
 
 export default function ExchangeCard({ rate }: { rate: ExchangeRate }) {
   const up = rate.change >= 0
