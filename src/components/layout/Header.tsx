@@ -5,40 +5,15 @@ import { Sun, Moon, TrendingUp } from "lucide-react"
 import { useEffect, useState } from "react"
 
 function MarketStatus() {
-  const [time, setTime] = useState("")
-
-  useEffect(() => {
-    const update = () => {
-      const now = new Date()
-      setTime(
-        now.toLocaleTimeString("ko-KR", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: false,
-        })
-      )
-    }
-    update()
-    const id = setInterval(update, 1000)
-    return () => clearInterval(id)
-  }, [])
-
   // KRX hours: 09:00~15:30 KST (UTC+9)
-  const isOpen = () => {
-    const now = new Date()
-    const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000)
-    const h = kst.getUTCHours()
-    const m = kst.getUTCMinutes()
-    const total = h * 60 + m
-    const day = kst.getUTCDay()
-    return day >= 1 && day <= 5 && total >= 540 && total < 930
-  }
-
-  const open = isOpen()
+  const now = new Date()
+  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000)
+  const total = kst.getUTCHours() * 60 + kst.getUTCMinutes()
+  const day = kst.getUTCDay()
+  const open = day >= 1 && day <= 5 && total >= 540 && total < 930
 
   return (
-    <div className="hidden sm:flex items-center gap-2 text-xs">
+    <div className="hidden sm:flex items-center text-xs">
       <span
         className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border"
         style={{
@@ -54,7 +29,6 @@ function MarketStatus() {
           {open ? "장중" : "장마감"}
         </span>
       </span>
-      <span style={{ color: "var(--muted)" }}>{time}</span>
     </div>
   )
 }
