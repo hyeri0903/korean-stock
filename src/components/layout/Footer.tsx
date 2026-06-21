@@ -41,7 +41,7 @@ export default function Footer() {
           className="flex flex-col gap-1 pt-2 text-[11px]"
           style={{ color: "var(--muted)" }}
         >
-          <span>© {year} 주식공부. All rights reserved.</span>
+          <span>© {year} Hyeri-Jung. All rights reserved.</span>
           <span>시세 데이터 제공: Yahoo Finance (지연 시세)</span>
         </div>
       </div>
