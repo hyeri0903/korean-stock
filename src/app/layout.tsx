@@ -3,6 +3,7 @@ import { Geist } from "next/font/google"
 import "./globals.css"
 import Header from "@/components/layout/Header"
 import TabNav from "@/components/layout/TabNav"
+import Footer from "@/components/layout/Footer"
 import QueryProvider from "@/providers/QueryProvider"
 import ThemeProvider from "@/providers/ThemeProvider"
 import { Analytics } from "@vercel/analytics/next"
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6">
               {children}
             </main>
+            <Footer />
           </QueryProvider>
         </ThemeProvider>
         <Analytics />
