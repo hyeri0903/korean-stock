@@ -40,9 +40,6 @@ export async function fetchStockQuote(ticker: string): Promise<StockQuote> {
   const meta = result.meta
 
   const price = meta.regularMarketPrice
-  const previousClose = meta.chartPreviousClose ?? 0
-  const change = previousClose ? price - previousClose : 0
-  const changePercent = previousClose ? (change / previousClose) * 100 : 0
 
   const timestamps = result.timestamp ?? []
   const quote = result.indicators.quote[0]
@@ -58,12 +55,22 @@ export async function fetchStockQuote(ticker: string): Promise<StockQuote> {
 
   const todayOpen = opens[opens.length - 1] ?? undefined
 
-  // 전일 종가 날짜: 히스토리 마지막 항목 (오늘 데이터 제외)
-  const previousCloseDate = history.length >= 2
-    ? history[history.length - 2].date
-    : history.length === 1
-      ? history[0].date
-      : ""
+  // 변동 계산 기준은 "오늘 시각 기준으로 장이 마지막으로 마감한 세션"이다.
+  // meta.chartPreviousClose는 차트 범위(1mo) 시작 직전 종가라 전일 대비 용도로 쓸 수 없다.
+  // - 장중: 마지막 캔들은 아직 마감 전 당일 봉 → 직전 캔들이 마지막 마감 세션
+  // - 장 마감(주말·휴장·장 종료 후): 마지막 캔들이 곧 마지막 마감 세션
+  const lastIdx = history.length - 1
+  const marketOpen = isKrxOpen(new Date())
+  const latestClosedIdx = marketOpen ? lastIdx - 1 : lastIdx
+
+  const previousCloseDate = latestClosedIdx >= 0 ? history[latestClosedIdx].date : ""
+  const previousClose =
+    latestClosedIdx >= 1 ? history[latestClosedIdx - 1].close : 0
+  const latestClose = latestClosedIdx >= 0 ? history[latestClosedIdx].close : price
+  // 장중이면 실시간가, 마감 상태면 마지막 마감 종가 기준으로 변동 산출
+  const reference = marketOpen ? price : latestClose
+  const change = previousClose ? reference - previousClose : 0
+  const changePercent = previousClose ? (change / previousClose) * 100 : 0
 
   return {
     ticker,
