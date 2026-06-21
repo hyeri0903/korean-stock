@@ -91,3 +91,138 @@ export async function fetchAllStocks(): Promise<StockQuote[]> {
     .filter((r): r is PromiseFulfilledResult<StockQuote> => r.status === "fulfilled")
     .map((r) => r.value)
 }
+
+export type Exchange = "KRX" | "US"
+
+export interface MarketIndex {
+  name: string
+  ticker: string
+  exchange: Exchange
+  price: number
+  change: number
+  changePercent: number
+  isOpen: boolean
+}
+
+interface IndexConfig {
+  yahooTicker: string
+  name: string
+  exchange: Exchange
+}
+
+const INDICES: IndexConfig[] = [
+  { yahooTicker: "^KS11", name: "KOSPI", exchange: "KRX" },
+  { yahooTicker: "^KQ11", name: "KOSDAQ", exchange: "KRX" },
+  { yahooTicker: "^GSPC", name: "S&P 500", exchange: "US" },
+  { yahooTicker: "^IXIC", name: "NASDAQ", exchange: "US" },
+  { yahooTicker: "^DJI", name: "Dow Jones", exchange: "US" },
+]
+
+/**
+ * 특정 시간대(IANA timeZone) 기준의 벽시계 정보를 반환한다.
+ * Intl을 사용하므로 미국 동부의 서머타임(DST) 전환이 자동 반영된다.
+ */
+function zonedNow(date: Date, timeZone: string): { ymd: string; minutes: number; dow: number } {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    weekday: "short",
+    hour12: false,
+  }).formatToParts(date)
+
+  const map: Record<string, string> = {}
+  for (const p of parts) map[p.type] = p.value
+
+  let hour = parseInt(map.hour, 10)
+  if (hour === 24) hour = 0 // 자정이 "24"로 표기되는 환경 보정
+  const minute = parseInt(map.minute, 10)
+  const weekdayMap: Record<string, number> = {
+    Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6,
+  }
+
+  return {
+    ymd: `${map.year}-${map.month}-${map.day}`,
+    minutes: hour * 60 + minute,
+    dow: weekdayMap[map.weekday] ?? 0,
+  }
+}
+
+// NYSE/Nasdaq 정규 휴장일 (전체 휴장). 매년 갱신 필요.
+const US_HOLIDAYS: ReadonlySet<string> = new Set([
+  "2026-01-01", // New Year's Day
+  "2026-01-19", // Martin Luther King Jr. Day
+  "2026-02-16", // Washington's Birthday
+  "2026-04-03", // Good Friday
+  "2026-05-25", // Memorial Day
+  "2026-06-19", // Juneteenth
+  "2026-07-03", // Independence Day (7/4 토요일 → 7/3 대체휴장)
+  "2026-09-07", // Labor Day
+  "2026-11-26", // Thanksgiving
+  "2026-12-25", // Christmas
+])
+
+// 조기 폐장일 (13:00 ET 마감). 매년 갱신 필요.
+const US_EARLY_CLOSE: ReadonlySet<string> = new Set([
+  "2026-11-27", // 추수감사절 다음 날
+  "2026-12-24", // 크리스마스 이브
+])
+
+function isKrxOpen(now: Date): boolean {
+  const { minutes, dow } = zonedNow(now, "Asia/Seoul")
+  if (dow === 0 || dow === 6) return false // 주말
+  // KRX 정규장: 09:00 ~ 15:30 KST (KST는 DST 없음)
+  return minutes >= 9 * 60 && minutes < 15 * 60 + 30
+}
+
+function isUsOpen(now: Date): boolean {
+  const { ymd, minutes, dow } = zonedNow(now, "America/New_York")
+  if (dow === 0 || dow === 6) return false // 주말
+  if (US_HOLIDAYS.has(ymd)) return false // 휴장일
+  // 정규장: 09:30 ~ 16:00 ET (조기 폐장일은 13:00), DST는 Intl이 자동 반영
+  const open = 9 * 60 + 30
+  const close = US_EARLY_CLOSE.has(ymd) ? 13 * 60 : 16 * 60
+  return minutes >= open && minutes < close
+}
+
+function marketIsOpen(exchange: Exchange, now: Date): boolean {
+  return exchange === "US" ? isUsOpen(now) : isKrxOpen(now)
+}
+
+async function fetchIndex(config: IndexConfig): Promise<MarketIndex> {
+  const { yahooTicker, name, exchange } = config
+  const url = `${YF_BASE}/v8/finance/chart/${encodeURIComponent(yahooTicker)}?interval=1d&range=1d`
+  const res = await fetch(url, {
+    headers: { "User-Agent": "Mozilla/5.0" },
+    next: { revalidate: 30 },
+    signal: AbortSignal.timeout(3000),
+  })
+  if (!res.ok) throw new Error(`${name} fetch failed`)
+
+  const data = await res.json()
+  const meta = data.chart.result[0].meta
+  const price: number = meta.regularMarketPrice
+  const prev: number = meta.chartPreviousClose ?? price
+  const change = prev ? price - prev : 0
+  const changePercent = prev ? (change / prev) * 100 : 0
+
+  return {
+    name,
+    ticker: yahooTicker,
+    exchange,
+    price,
+    change,
+    changePercent,
+    isOpen: marketIsOpen(exchange, new Date()),
+  }
+}
+
+export async function fetchMarketIndices(): Promise<MarketIndex[]> {
+  const results = await Promise.allSettled(INDICES.map(fetchIndex))
+  return results
+    .filter((r): r is PromiseFulfilledResult<MarketIndex> => r.status === "fulfilled")
+    .map((r) => r.value)
+}

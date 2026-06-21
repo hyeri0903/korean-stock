@@ -1,7 +1,7 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
-import type { MarketIndex } from "@/app/api/index/route"
+import type { MarketIndex } from "@/lib/api/yahoo-finance"
 
 async function fetchIndices(): Promise<MarketIndex[]> {
   const res = await fetch("/api/index")
@@ -25,7 +25,7 @@ function IndexCard({ index }: { index: MarketIndex }) {
     >
       {/* Left: name + status */}
       <div className="flex items-center gap-3 min-w-0">
-        <span className="text-xl shrink-0" aria-hidden>🇰🇷</span>
+        <span className="text-xl shrink-0" aria-hidden>{index.exchange === "US" ? "🇺🇸" : "🇰🇷"}</span>
         <div>
           <div className="flex items-center gap-2">
             <span className="font-bold text-base">{index.name}</span>
