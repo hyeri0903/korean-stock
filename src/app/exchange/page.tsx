@@ -1,24 +1,8 @@
-import type { ExchangeRate } from "@/app/api/exchange/route"
 import ExchangeClient from "@/components/exchange/ExchangeClient"
 import FearGreedBanner from "@/components/exchange/FearGreedBanner"
 import ExchangeLastUpdated from "@/components/exchange/ExchangeLastUpdated"
 
-export const revalidate = 3600
-
-async function fetchInitial(): Promise<ExchangeRate[]> {
-  try {
-    const base = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000"
-    const res = await fetch(`${base}/api/exchange`, { next: { revalidate: 3600 } })
-    if (!res.ok) return []
-    return res.json()
-  } catch {
-    return []
-  }
-}
-
-export default async function ExchangePage() {
-  const initial = await fetchInitial()
-
+export default function ExchangePage() {
   return (
     <div>
       <div className="mb-5">
@@ -31,7 +15,7 @@ export default async function ExchangePage() {
         </div>
       </div>
       <FearGreedBanner />
-      <ExchangeClient initial={initial} />
+      <ExchangeClient />
     </div>
   )
 }
