@@ -17,44 +17,42 @@ function IndexCard({ index }: { index: MarketIndex }) {
 
   return (
     <div
-      className="flex-1 flex items-center justify-between px-5 py-4 rounded-2xl min-w-0"
+      className="flex flex-col gap-2 px-4 py-3.5 rounded-2xl min-w-0"
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
       }}
     >
-      {/* Left: name + status */}
-      <div className="flex items-center gap-3 min-w-0">
-        <span className="text-xl shrink-0" aria-hidden>{index.exchange === "US" ? "🇺🇸" : "🇰🇷"}</span>
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-base">{index.name}</span>
-            <span
-              className="text-xs px-2 py-0.5 rounded-full font-medium flex items-center gap-1"
-              style={{
-                backgroundColor: index.isOpen ? "#22c55e18" : "var(--border)",
-                color: index.isOpen ? "#22c55e" : "var(--muted)",
-                border: `1px solid ${index.isOpen ? "#22c55e33" : "transparent"}`,
-              }}
-            >
-              <span
-                className="w-1.5 h-1.5 rounded-full"
-                style={{ backgroundColor: index.isOpen ? "#22c55e" : "var(--muted)" }}
-              />
-              {index.isOpen ? "장중" : "마감"}
-            </span>
-          </div>
+      {/* Top: name + status */}
+      <div className="flex items-center justify-between gap-2 min-w-0">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="text-base shrink-0" aria-hidden>{index.exchange === "US" ? "🇺🇸" : "🇰🇷"}</span>
+          <span className="font-bold text-sm truncate">{index.name}</span>
         </div>
+        <span
+          className="text-[10px] px-1.5 py-0.5 rounded-full font-medium flex items-center gap-1 shrink-0"
+          style={{
+            backgroundColor: index.isOpen ? "#22c55e18" : "var(--border)",
+            color: index.isOpen ? "#22c55e" : "var(--muted)",
+            border: `1px solid ${index.isOpen ? "#22c55e33" : "transparent"}`,
+          }}
+        >
+          <span
+            className="w-1.5 h-1.5 rounded-full"
+            style={{ backgroundColor: index.isOpen ? "#22c55e" : "var(--muted)" }}
+          />
+          {index.isOpen ? "장중" : "마감"}
+        </span>
       </div>
 
-      {/* Right: change + price */}
-      <div className="flex items-baseline gap-3 shrink-0">
-        <span className="text-sm tabular-nums" style={{ color: changeColor }}>
-          {arrow} {sign}{index.change.toFixed(2)}&nbsp;
-          <span className="font-semibold">{sign}{index.changePercent.toFixed(2)}%</span>
-        </span>
-        <span className="text-2xl font-bold tabular-nums" style={{ letterSpacing: "-0.02em" }}>
+      {/* Bottom: price + change */}
+      <div className="flex flex-col gap-0.5 min-w-0">
+        <span className="text-xl font-bold tabular-nums truncate" style={{ letterSpacing: "-0.02em" }}>
           {index.price.toLocaleString("ko-KR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </span>
+        <span className="text-xs tabular-nums truncate" style={{ color: changeColor }}>
+          {arrow} {sign}{index.change.toFixed(2)}{" "}
+          <span className="font-semibold">{sign}{index.changePercent.toFixed(2)}%</span>
         </span>
       </div>
     </div>
@@ -64,14 +62,15 @@ function IndexCard({ index }: { index: MarketIndex }) {
 function IndexCardSkeleton() {
   return (
     <div
-      className="flex-1 flex items-center justify-between px-5 py-4 rounded-2xl"
+      className="flex flex-col gap-2 px-4 py-3.5 rounded-2xl"
       style={{ backgroundColor: "var(--surface)", border: "1px solid var(--border)" }}
     >
-      <div className="flex items-center gap-3">
-        <div className="w-7 h-7 rounded-full animate-pulse" style={{ backgroundColor: "var(--border)" }} />
-        <div className="h-5 w-20 rounded animate-pulse" style={{ backgroundColor: "var(--border)" }} />
+      <div className="flex items-center justify-between">
+        <div className="h-4 w-16 rounded animate-pulse" style={{ backgroundColor: "var(--border)" }} />
+        <div className="h-4 w-10 rounded-full animate-pulse" style={{ backgroundColor: "var(--border)" }} />
       </div>
-      <div className="h-8 w-32 rounded animate-pulse" style={{ backgroundColor: "var(--border)" }} />
+      <div className="h-6 w-24 rounded animate-pulse" style={{ backgroundColor: "var(--border)" }} />
+      <div className="h-3 w-20 rounded animate-pulse" style={{ backgroundColor: "var(--border)" }} />
     </div>
   )
 }
@@ -86,15 +85,16 @@ export default function MarketIndexBar({ initial }: { initial: MarketIndex[] }) 
 
   if (!data?.length) {
     return (
-      <div className="flex gap-3 mb-6">
-        <IndexCardSkeleton />
-        <IndexCardSkeleton />
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <IndexCardSkeleton key={i} />
+        ))}
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col sm:flex-row gap-3 mb-6">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
       {data.map((idx) => (
         <IndexCard key={idx.ticker} index={idx} />
       ))}
